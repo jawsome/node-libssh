@@ -1,8 +1,8 @@
 project(tests C)
 
-if (BSD OR SOLARIS OR OSX)
+if (BSD OR SOLARIS)
     find_package(Argp)
-endif (BSD OR SOLARIS OR OSX)
+endif (BSD OR SOLARIS)
 
 set(TORTURE_LIBRARY torture)
 

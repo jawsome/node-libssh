@@ -99,8 +99,8 @@ static int ecdh_build_k(ssh_session session) {
   const EC_GROUP *group = EC_KEY_get0_group(session->next_crypto->ecdh_privkey);
   EC_POINT *pubkey;
   void *buffer;
-  int rc;
   int len = (EC_GROUP_get_degree(group) + 7) / 8;
+  int rc;
   bignum_CTX ctx = bignum_ctx_new();
   if (ctx == NULL) {
     return -1;
@@ -118,25 +118,12 @@ static int ecdh_build_k(ssh_session session) {
     return -1;
   }
 
-  if (session->server) {
-      rc = EC_POINT_oct2point(group,
-                              pubkey,
-                              ssh_string_data(session->next_crypto->ecdh_client_pubkey),
-                              ssh_string_len(session->next_crypto->ecdh_client_pubkey),
-                              ctx);
-  } else {
-      rc = EC_POINT_oct2point(group,
-                              pubkey,
-                              ssh_string_data(session->next_crypto->ecdh_server_pubkey),
-                              ssh_string_len(session->next_crypto->ecdh_server_pubkey),
-                              ctx);
-  }
-  bignum_ctx_free(ctx);
-  if (rc <= 0) {
-      EC_POINT_clear_free(pubkey);
-      return -1;
-  }
-
+  if (session->server)
+      EC_POINT_oct2point(group,pubkey,ssh_string_data(session->next_crypto->ecdh_client_pubkey),
+              ssh_string_len(session->next_crypto->ecdh_client_pubkey),ctx);
+  else
+      EC_POINT_oct2point(group,pubkey,ssh_string_data(session->next_crypto->ecdh_server_pubkey),
+              ssh_string_len(session->next_crypto->ecdh_server_pubkey),ctx);
   buffer = malloc(len);
   if (buffer == NULL) {
       EC_POINT_clear_free(pubkey);
@@ -156,16 +143,18 @@ static int ecdh_build_k(ssh_session session) {
 
   bignum_bin2bn(buffer, len, session->next_crypto->k);
   free(buffer);
-
   EC_KEY_free(session->next_crypto->ecdh_privkey);
-  session->next_crypto->ecdh_privkey = NULL;
-
+  session->next_crypto->ecdh_privkey=NULL;
 #ifdef DEBUG_CRYPTO
     ssh_print_hexa("Session server cookie",
                    session->next_crypto->server_kex.cookie, 16);
     ssh_print_hexa("Session client cookie",
                    session->next_crypto->client_kex.cookie, 16);
     ssh_print_bignum("Shared secret key", session->next_crypto->k);
+#endif
+
+#ifdef HAVE_LIBCRYPTO
+  bignum_ctx_free(ctx);
 #endif
 
   return 0;

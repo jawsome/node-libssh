@@ -182,8 +182,8 @@ void ssh_socket_reset(ssh_socket s){
   s->fd_out= SSH_INVALID_SOCKET;
   s->last_errno = -1;
   s->fd_is_socket = 1;
-  ssh_buffer_reinit(s->in_buffer);
-  ssh_buffer_reinit(s->out_buffer);
+  buffer_reinit(s->in_buffer);
+  buffer_reinit(s->out_buffer);
   s->read_wontblock = 0;
   s->write_wontblock = 0;
   s->data_except = 0;
@@ -280,11 +280,8 @@ int ssh_socket_pollcallback(struct ssh_poll_handle_struct *p, socket_t fd, int r
 			}
 		}
 		if(r>0){
-            if (s->session->socket_counter != NULL) {
-                s->session->socket_counter->in_bytes += r;
-            }
 			/* Bufferize the data and then call the callback */
-            r = ssh_buffer_add_data(s->in_buffer,buffer,r);
+            r = buffer_add_data(s->in_buffer,buffer,r);
             if (r < 0) {
                 return -1;
             }
@@ -611,7 +608,7 @@ void ssh_socket_fd_set(ssh_socket s, fd_set *set, socket_t *max_fd) {
  */
 int ssh_socket_write(ssh_socket s, const void *buffer, int len) {
   if(len > 0) {
-    if (ssh_buffer_add_data(s->out_buffer, buffer, len) < 0) {
+    if (buffer_add_data(s->out_buffer, buffer, len) < 0) {
       ssh_set_error_oom(s->session);
       return SSH_ERROR;
     }
@@ -662,9 +659,6 @@ int ssh_socket_nonblocking_flush(ssh_socket s) {
       return SSH_ERROR;
     }
     buffer_pass_bytes(s->out_buffer, w);
-    if (s->session->socket_counter != NULL) {
-        s->session->socket_counter->out_bytes += w;
-    }
   }
 
   /* Is there some data pending? */
@@ -715,11 +709,11 @@ int ssh_socket_buffered_write_bytes(ssh_socket s){
 int ssh_socket_get_status(ssh_socket s) {
   int r = 0;
 
-  if (ssh_buffer_get_len(s->in_buffer) > 0) {
+  if (buffer_get_len(s->in_buffer) > 0) {
       r |= SSH_READ_PENDING;
   }
 
-  if (ssh_buffer_get_len(s->out_buffer) > 0) {
+  if (buffer_get_len(s->out_buffer) > 0) {
       r |= SSH_WRITE_PENDING;
   }
 

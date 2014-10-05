@@ -542,7 +542,7 @@ pending:
       if (timeout == 0) {
           timeout = 10 * 1000;
       }
-      SSH_LOG(SSH_LOG_PACKET,"Actual timeout : %d", timeout);
+      SSH_LOG(SSH_LOG_PACKET,"ssh_connect: Actual timeout : %d", timeout);
       ret = ssh_handle_packets_termination(session, timeout, ssh_connect_termination, session);
       if (session->session_state != SSH_SESSION_STATE_ERROR &&
           (ret == SSH_ERROR || !ssh_connect_termination(session))) {
@@ -560,7 +560,7 @@ pending:
           session->session_state = SSH_SESSION_STATE_ERROR;
       }
   }
-  SSH_LOG(SSH_LOG_PACKET,"current state : %d",session->session_state);
+  SSH_LOG(SSH_LOG_PACKET,"ssh_connect: Actual state : %d",session->session_state);
   if(!ssh_is_blocking(session) && !ssh_connect_termination(session)){
     return SSH_AGAIN;
   }
@@ -668,18 +668,14 @@ error:
     crypto_free(session->current_crypto);
     session->current_crypto=NULL;
   }
-  if (session->in_buffer) {
-    ssh_buffer_reinit(session->in_buffer);
-  }
-  if (session->out_buffer) {
-    ssh_buffer_reinit(session->out_buffer);
-  }
-  if (session->in_hashbuf) {
-    ssh_buffer_reinit(session->in_hashbuf);
-  }
-  if (session->out_hashbuf) {
-    ssh_buffer_reinit(session->out_hashbuf);
-  }
+  if(session->in_buffer)
+    buffer_reinit(session->in_buffer);
+  if(session->out_buffer)
+    buffer_reinit(session->out_buffer);
+  if(session->in_hashbuf)
+    buffer_reinit(session->in_hashbuf);
+  if(session->out_hashbuf)
+    buffer_reinit(session->out_hashbuf);
   session->auth_methods = 0;
   SAFE_FREE(session->serverbanner);
   SAFE_FREE(session->clientbanner);

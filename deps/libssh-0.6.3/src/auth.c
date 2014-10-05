@@ -448,7 +448,7 @@ pending:
     return rc;
 fail:
     ssh_set_error_oom(session);
-    ssh_buffer_reinit(session->out_buffer);
+    buffer_reinit(session->out_buffer);
 
     return SSH_AUTH_ERROR;
 }
@@ -614,7 +614,7 @@ pending:
     return rc;
 fail:
     ssh_set_error_oom(session);
-    ssh_buffer_reinit(session->out_buffer);
+    buffer_reinit(session->out_buffer);
 
     return SSH_AUTH_ERROR;
 }
@@ -788,7 +788,7 @@ pending:
     return rc;
 fail:
     ssh_set_error_oom(session);
-    ssh_buffer_reinit(session->out_buffer);
+    buffer_reinit(session->out_buffer);
 
     return SSH_AUTH_ERROR;
 }
@@ -924,7 +924,7 @@ pending:
     return rc;
 fail:
     ssh_set_error_oom(session);
-    ssh_buffer_reinit(session->out_buffer);
+    buffer_reinit(session->out_buffer);
 
     return SSH_AUTH_ERROR;
 }
@@ -1415,7 +1415,7 @@ pending:
     return rc;
 fail:
     ssh_set_error_oom(session);
-    ssh_buffer_reinit(session->out_buffer);
+    buffer_reinit(session->out_buffer);
 
     return SSH_AUTH_ERROR;
 }
@@ -1642,7 +1642,7 @@ pending:
     return rc;
 fail:
     ssh_set_error_oom(session);
-    ssh_buffer_reinit(session->out_buffer);
+    buffer_reinit(session->out_buffer);
 
     return SSH_AUTH_ERROR;
 }
@@ -1690,8 +1690,8 @@ static int ssh_userauth_kbdint_send(ssh_session session)
         }
 
         rc = buffer_add_ssh_string(session->out_buffer, answer);
-        ssh_string_burn(answer);
-        ssh_string_free(answer);
+        string_burn(answer);
+        string_free(answer);
         if (rc < 0) {
             goto fail;
         }
@@ -1716,7 +1716,7 @@ pending:
     return rc;
 fail:
     ssh_set_error_oom(session);
-    ssh_buffer_reinit(session->out_buffer);
+    buffer_reinit(session->out_buffer);
 
     return SSH_AUTH_ERROR;
 }

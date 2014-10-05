@@ -114,7 +114,7 @@ int ssh_packet_socket_callback1(const void *data, size_t receivedlen, void *user
       memset(&session->in_packet, 0, sizeof(PACKET));
 
       if (session->in_buffer) {
-        if (ssh_buffer_reinit(session->in_buffer) < 0) {
+        if (buffer_reinit(session->in_buffer) < 0) {
           goto error;
         }
       } else {
@@ -155,7 +155,7 @@ int ssh_packet_socket_callback1(const void *data, size_t receivedlen, void *user
       /* it is _not_ possible that to_be_read be < 8. */
       packet = (char *)data + processed;
 
-      if (ssh_buffer_add_data(session->in_buffer,packet,to_be_read) < 0) {
+      if (buffer_add_data(session->in_buffer,packet,to_be_read) < 0) {
         goto error;
       }
       processed += to_be_read;
@@ -322,7 +322,7 @@ int packet_send1(ssh_session session) {
 
   session->send_seq++;
 
-  if (ssh_buffer_reinit(session->out_buffer) < 0) {
+  if (buffer_reinit(session->out_buffer) < 0) {
     rc = SSH_ERROR;
   }
 error:

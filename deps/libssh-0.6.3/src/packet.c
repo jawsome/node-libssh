@@ -177,7 +177,7 @@ int ssh_packet_socket_callback(const void *data, size_t receivedlen, void *user)
             memset(&session->in_packet, 0, sizeof(PACKET));
 
             if (session->in_buffer) {
-                rc = ssh_buffer_reinit(session->in_buffer);
+                rc = buffer_reinit(session->in_buffer);
                 if (rc < 0) {
                     goto error;
                 }
@@ -192,7 +192,7 @@ int ssh_packet_socket_callback(const void *data, size_t receivedlen, void *user)
             processed += blocksize;
             len = packet_decrypt_len(session, buffer);
 
-            rc = ssh_buffer_add_data(session->in_buffer, buffer, blocksize);
+            rc = buffer_add_data(session->in_buffer, buffer, blocksize);
             if (rc < 0) {
                 goto error;
             }
@@ -237,7 +237,7 @@ int ssh_packet_socket_callback(const void *data, size_t receivedlen, void *user)
                                 to_be_read - current_macsize);
 #endif
 
-                rc = ssh_buffer_add_data(session->in_buffer,
+                rc = buffer_add_data(session->in_buffer,
                                      packet,
                                      to_be_read - current_macsize);
                 if (rc < 0) {
@@ -311,10 +311,6 @@ int ssh_packet_socket_callback(const void *data, size_t receivedlen, void *user)
 #endif /* WITH_ZLIB */
             payloadsize = buffer_get_rest_len(session->in_buffer);
             session->recv_seq++;
-            if (session->raw_counter != NULL) {
-                session->raw_counter->in_bytes += payloadsize;
-                session->raw_counter->in_packets++;
-            }
 
             /*
              * We don't want to rewrite a new packet while still executing the
@@ -544,7 +540,7 @@ static int packet_send2(ssh_session session) {
   if (buffer_prepend_data(session->out_buffer, &finallen, sizeof(uint32_t)) < 0) {
     goto error;
   }
-  if (ssh_buffer_add_data(session->out_buffer, padstring, padding) < 0) {
+  if (buffer_add_data(session->out_buffer, padstring, padding) < 0) {
     goto error;
   }
 #ifdef WITH_PCAP
@@ -557,22 +553,18 @@ static int packet_send2(ssh_session session) {
   hmac = packet_encrypt(session, buffer_get_rest(session->out_buffer),
       buffer_get_rest_len(session->out_buffer));
   if (hmac) {
-    if (ssh_buffer_add_data(session->out_buffer, hmac, 20) < 0) {
+    if (buffer_add_data(session->out_buffer, hmac, 20) < 0) {
       goto error;
     }
   }
 
   rc = ssh_packet_write(session);
   session->send_seq++;
-  if (session->raw_counter != NULL) {
-      session->raw_counter->out_bytes += payloadsize;
-      session->raw_counter->out_packets++;
-  }
 
   SSH_LOG(SSH_LOG_PACKET,
           "packet: wrote [len=%d,padding=%hhd,comp=%d,payload=%d]",
           ntohl(finallen), padding, compsize, payloadsize);
-  if (ssh_buffer_reinit(session->out_buffer) < 0) {
+  if (buffer_reinit(session->out_buffer) < 0) {
     rc = SSH_ERROR;
   }
 error:

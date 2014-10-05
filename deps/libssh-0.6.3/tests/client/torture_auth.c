@@ -305,7 +305,7 @@ static void torture_auth_agent(void **state) {
         return;
     }
     if (!agent_is_running(session)){
-        print_message("*** Agent not running. Test ignored\n");
+        print_message("*** Agent not running. Test ignored");
         return;
     }
     rc = ssh_options_set(session, SSH_OPTIONS_USER, user);
@@ -337,7 +337,7 @@ static void torture_auth_agent_nonblocking(void **state) {
         return;
     }
     if (!agent_is_running(session)){
-        print_message("*** Agent not running. Test ignored\n");
+        print_message("*** Agent not running. Test ignored");
         return;
     }
     rc = ssh_options_set(session, SSH_OPTIONS_USER, user);

@@ -345,12 +345,12 @@ ssh_key pki_key_dup(const ssh_key key, int demote)
         break;
     case SSH_KEYTYPE_ECDSA:
 #ifdef HAVE_OPENSSL_ECC
-        new->ecdsa_nid = key->ecdsa_nid;
-
         /* privkey -> pubkey */
         if (demote && ssh_key_is_private(key)) {
             const EC_POINT *p;
             int ok;
+
+            new->ecdsa_nid = key->ecdsa_nid;
 
             new->ecdsa = EC_KEY_new_by_curve_name(key->ecdsa_nid);
             if (new->ecdsa == NULL) {
@@ -937,7 +937,7 @@ ssh_string pki_publickey_to_blob(const ssh_key key)
             break;
         case SSH_KEYTYPE_ECDSA:
 #ifdef HAVE_OPENSSL_ECC
-            rc = ssh_buffer_reinit(buffer);
+            rc = buffer_reinit(buffer);
             if (rc < 0) {
                 ssh_buffer_free(buffer);
                 return NULL;
@@ -1148,6 +1148,8 @@ static ssh_string pki_dsa_signature_to_blob(const ssh_signature sig)
 
 ssh_string pki_signature_to_blob(const ssh_signature sig)
 {
+    ssh_string r;
+    ssh_string s;
     ssh_string sig_blob = NULL;
 
     switch(sig->type) {
@@ -1161,8 +1163,6 @@ ssh_string pki_signature_to_blob(const ssh_signature sig)
         case SSH_KEYTYPE_ECDSA:
 #ifdef HAVE_OPENSSL_ECC
         {
-            ssh_string r;
-            ssh_string s;
             ssh_buffer b;
             int rc;
 
@@ -1361,9 +1361,9 @@ ssh_signature pki_signature_from_blob(const ssh_key pubkey,
                     return NULL;
                 }
 
-                rc = ssh_buffer_add_data(b,
-                                         ssh_string_data(sig_blob),
-                                         ssh_string_len(sig_blob));
+                rc = buffer_add_data(b,
+                                     ssh_string_data(sig_blob),
+                                     ssh_string_len(sig_blob));
                 if (rc < 0) {
                     ssh_buffer_free(b);
                     ssh_signature_free(sig);

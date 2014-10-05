@@ -493,7 +493,7 @@ int ssh_send_kex(ssh_session session, int server_kex) {
   if (buffer_add_u8(session->out_buffer, SSH2_MSG_KEXINIT) < 0) {
     goto error;
   }
-  if (ssh_buffer_add_data(session->out_buffer, kex->cookie, 16) < 0) {
+  if (buffer_add_data(session->out_buffer, kex->cookie, 16) < 0) {
     goto error;
   }
 
@@ -532,8 +532,8 @@ int ssh_send_kex(ssh_session session, int server_kex) {
 
   return 0;
 error:
-  ssh_buffer_reinit(session->out_buffer);
-  ssh_buffer_reinit(session->out_hashbuf);
+  buffer_reinit(session->out_buffer);
+  buffer_reinit(session->out_hashbuf);
   ssh_string_free(str);
 
   return -1;
